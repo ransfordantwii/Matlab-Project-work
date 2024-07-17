@@ -1,0 +1,5 @@
+[EGR102 Final Project Part 1 S2024v2(1) (1).docx](https://github.com/user-attachments/files/16274567/EGR102.Final.Project.Part.1.S2024v2.1.1.docx)
+[EGR102 Final Project Part 2 Ransford A.(00558567).docx](https://github.com/user-attachments/files/16274575/EGR102.Final.Project.Part.2.Ransford.A.00558567.docx)
+[EGR102 Final Project Part 3 Ransford.docx](https://github.com/user-attachments/files/16274577/EGR102.Final.Project.Part.3.Ransford.docx)
+[EGR102 Final Project Part 4 S2024 (1).docx](https://github.com/user-attachments/files/16274590/EGR102.Final.Project.Part.4.S2024.1.docx)
+[EGR102 Final Project Part 5 S2024.docx](https://github.com/user-attachments/files/16274591/EGR102.Final.Project.Part.5.S2024.docx)
