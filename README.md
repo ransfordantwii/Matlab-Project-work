@@ -39,4 +39,9 @@ YPX = 0.5;% yield g protein/ g cells
 Xin = 0;% feed biomass concentration g cells/L
 Sin = 80;% feed substrate concentration g substrate/L
 Pin = 0;% feed protein concentration g protein/L
+# Optimization
+Objective Function for Production:
+Production here is the sum of protein product produced, P, over the whole run.  The formula to calculate this is straightforward the volumetric flowrate, Fin, times the exit protein concentration at that sample time P(i) times the duration of sample, delt, all summed over the run. Goal is to maximize this amount. 
+## Prod=Prod+Fin*P(i)*delt
+Use the best set of parameters found in Part 5 as your base model to be optimized for production. Here only maximizing a fixed flowrate, Fin so no need for a graph of Fin just embed the best production and Fin in the title.  So could use best parameters from part 5 and start with Part 4 ic since it has one for loop for trying different combinations for different combinations of mu_max which you can hijack and switch to different combinations of Fin.  
 
