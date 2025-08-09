@@ -1,0 +1,62 @@
+%Bioreactor_fxn_ode
+%Ransford Antwi
+
+%user assigned
+% Simulation Parameters
+% t_end=100; % total simulation hrs
+% 
+% % Initial Conditions:
+% X(1)= 0.1;% g cells/ L
+% S(1)= 20;% g substrate/ L
+% P(1)= 0;% g protein /L
+% 
+% %Nominal Parameter Values (To Be Fitted):
+% mu_max = 0.5;% maximum growth rate h-1
+% K= 20;% Monod growth constant g substrate/L
+% Ki= 50;% Substrate inhibition growth constant g substrate/L
+% Input 
+%Fin=100;% feed flow rate L/hr
+
+% Parameters
+% V=1000;% bioreactor volume L
+% YSX = 1.5;% yield g substrate/ g cells
+% YPX = 0.5;% yield g protein/ g cells
+% Xin = 0;% feed biomass concentration g cells/L
+% Sin = 80;% feed substrate concentration g substrate/L
+% Pin = 0;% feed protein concentration g protein/L
+
+
+
+%main program
+function [xdot]=bioreactor_ode(t,x,opts,param,Fin,mu_max)
+X=x(1); %position must match
+S=x(2);
+P=x(3);
+%packing elements to param 
+
+V=param(1);
+Ysx=param(2);
+Ypx=param(3);
+Xin=param(4);
+Sin=param(5);
+Pin=param(6);
+K=param(7);
+Ki=param(8);
+%ODE
+mu=mu_max*S/(K+S+(S^2/Ki));
+dXdt=(Fin*(Xin-X))/V+mu*X;
+dSdt=(Fin*(Sin-S))/V-Ysx*mu*X;
+dPdt=(Fin*(Pin-P))/V+Ypx*mu*X;
+xdot=[dXdt;dSdt;dPdt];
+
+
+
+
+
+
+
+
+
+
+
+
