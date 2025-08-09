@@ -1,0 +1,130 @@
+%Bioreactor_Opt_Production_EC_ic%
+%Ransford Antwi%
+%March 5, 2024%
+%Final_Project_Part_EC_main
+
+%blank slate%
+clear
+clc
+% user assigned%
+%sample time
+t_end=20;
+delt=0.1;
+
+% Initial Conditions:
+X_init= 161.916;% g cells/ L
+S_init= 7.125;% g substrate/ L
+P_init= 80.96;% g protein /L
+
+%Fitted Parameter Values (To Be Fitted):
+K= 20;% best K
+Ki= 51;% best Ki
+mu_max=0.59; %best mu_max
+
+
+%input added
+Fin_min=10;% initial feed flow rate L/hr
+Fin_inc=5; %increment
+Fin_max=100;% final feed flow rate L/hr
+
+%Parameters
+V=1000;% bioreactor volume L
+Ysx = 1.5;% yield g substrate/ g cells
+Ypx = 0.5;% yield g protein/ g cells
+Xin = 0;% feed biomass concentration g cells/L
+Sin = 250;% feed substrate concentration g substrate/L
+Pin = 0;% feed protein concentration g protein/L
+
+
+%main program
+%[xdot]=lorenz_ode_2(t,x,opts,sigma,r,b)
+%intialization
+X(1)=X_init;
+S(1)=S_init;
+P(1)=P_init;
+x0=[X(1);S(1);P(1);];
+%unpacking to various parameters
+param(1)=V;
+param(2)=Ysx;
+param(3)=Ypx;
+param(4)=Xin;
+param(5)=Sin;
+param(6)=Pin;
+param(7)=K;
+param(8)=Ki;
+%initial time
+t(1)=0;
+
+%number of samples in for loop
+N=ceil(t_end/delt);
+%best production being maximized
+Best_Prod= 0;
+
+for Fin=Fin_min:Fin_inc:Fin_max
+% Initial Sum of prod
+Prod=0;
+%This is my experimental loop!!!!!
+for i=2:N
+t(i)=t(i-1)+delt;
+
+
+%[xdot]=vdv_fxn(t,x,opts,param,u)
+[~,Xout]=ode45('bioreactor_ode_EC',[t(i-1) ,t(i)],x0,[],param,Fin,mu_max,K,Ki);
+%unpack Xout to common notation for states
+X(i)=Xout(end,1); 
+S(i)=Xout(end,2);
+P(i)=Xout(end,3);
+% ba reinitialization vector
+x0=[X(i);S(i);P(i)];
+
+%BA calculate sum of production
+Prod=Prod+Fin*P(i)*delt;
+end
+%compare to the previous ones to see if this one is better
+if Prod>Best_Prod
+Best_Prod=Prod; 
+Best_Fin=Fin; 
+end
+% Clean up and Reset Experiment 7. BA
+clear t X S P % always clear the time vector and states
+% Reinitialize
+t(1)=0; % reinitialize time vector
+X(1)=X_init; % 2. set first CA and T to init values
+S(1)=S_init;
+P(1)=P_init;
+x0=[X(1);S(1);P(1)];% ba initialization vector
+end %end o loop for Mu_max
+
+% Set parameter(s) to Best ones found! and rerun simulation 8. BA
+Fin=Best_Fin;
+%experimental loop
+% Initial Sum of production
+Prod=0;
+for i=2:N 
+t(i)=t(i-1)+delt;% BA time vector
+
+%[xdot]=vdv_fxn(t,x,opts,param,u)
+[~,Xout]=ode45('bioreactor_ode_EC',[t(i-1) ,t(i)],x0,[],param,Fin,mu_max,K,Ki);
+
+%unpack Xout to common notation for states
+X(i)=Xout(end,1); 
+S(i)=Xout(end,2);
+P(i)=Xout(end,3);
+% ba reinitialization vector
+x0=[X(i);S(i);P(i)];
+
+%BA calculate sum of production
+Prod=Prod+Fin*P(i)*delt;
+end
+
+%Graphing
+%ploting subplot
+figure(1);
+subplot(3,1,1);plot(t,X,'rx') 
+ylabel('X(g cells/L')
+title([' Final Project EC Best Prod= ',num2str(Prod),' with the best mu max=',num2str(mu_max),'Best K=',num2str(K),'and Best Ki=',num2str(Ki)])
+subplot(3,1,2);plot(t,S)
+ylabel('S(g substrate/L')
+subplot(3,1,3);plot(t,P)
+ylabel('P(g Protein/L')
+xlabel('Time(hrs)')
