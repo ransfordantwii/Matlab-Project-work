@@ -1,0 +1,148 @@
+%Bioreactor_Final_Project_Part_5_ic
+%Ransford Antwi%
+%March 5, 2024%
+%
+%blank slate%
+clear
+clc
+% user assigned%
+%loading data file
+load final_proj_3_data_file.mat
+% Simulation Parameters
+% will obtain from data file instead 
+
+% Initial Conditions:
+X_init= 161.916;% g cells/ L
+S_init= 7.125;% g substrate/ L
+P_init= 80.96;% g protein /L
+
+
+%%%Ki
+Ki_max=53;
+Ki_min=47;
+Ki_inc=1;
+%%%K
+K_max = 22;% maximum growth rate h-1
+K_min = 19;% maximum growth rate h-1
+K_inc=1;%increament
+%%%mu_max
+mu_max_max = 0.59;% maximum growth rate h-1
+mu_max_min = 0.58;% maximum growth rate h-1
+mu_max_inc=0.01;%increament
+
+%input added
+Fin=Fin_act;
+%Parameters
+V=1000;% bioreactor volume L
+Ysx = 1.5;% yield g substrate/ g cells
+Ypx = 0.5;% yield g protein/ g cells
+Xin = 0;% feed biomass concentration g cells/L
+Sin = 250;% feed substrate concentration g substrate/L
+Pin = 0;% feed protein concentration g protein/L
+
+
+%main program
+%[xdot]=lorenz_ode_2(t,x,opts,sigma,r,b)
+%intialization
+X(1)=X_init;
+S(1)=S_init;
+P(1)=P_init;
+x0=[X(1);S(1);P(1);];
+%unpacking to various parameters
+param(1)=V;
+param(2)=Ysx;
+param(3)=Ypx;
+param(4)=Xin;
+param(5)=Sin;
+param(6)=Pin;
+
+%initial time
+t(1)=0;
+
+%number of samples in for loop
+N=ceil(t_end/delt);
+%%%%%ECP1
+
+%best MSE
+Best_MSE= 1E10;
+%a loop fo K,Ki,mumax
+for Ki=Ki_min:Ki_inc:Ki_max
+for K=K_min:K_inc:K_max
+for mu_max=mu_max_min:mu_max_inc:mu_max_max
+% Initial Sum of Square Error
+SSE=(X_act(1)-X(1))^2;
+%This is my experimental loop!!!!!
+for i=2:N
+t(i)=t(i-1)+delt;
+%[xdot]=vdv_fxn(t,x,opts,param,u)
+[~,Xout]=ode45('bioreactor_ode_EC',[t(i-1) ,t(i)],x0,[],param,Fin(i-1),mu_max,K,Ki);
+%unpack Xout to common notation for states
+X(i)=Xout(end,1);
+S(i)=Xout(end,2);
+P(i)=Xout(end,3);
+% ba reinitialization vector
+x0=[X(i);S(i);P(i)];
+%BA call sum of sq error
+SSE=SSE+(X_act(i)-X(i))^2;
+end
+%Mean square error divide total by numebr sample
+MSE=SSE/N;
+if MSE<Best_MSE
+Best_MSE=MSE; % save current MSE as the new best one
+Best_mu_max=mu_max; % save the current paramater used as the new best one.
+Best_K=K;
+Best_Ki=Ki;
+end
+% Clean up and Reset Experiment 7. BA
+clear t X S P % always clear the time vector and states
+% Reinitialize
+t(1)=0; % reinitialize time vector
+X(1)=X_init; % 2. set first CA and T to init values
+S(1)=S_init;
+P(1)=P_init;
+x0=[X(1);S(1);P(1)];% ba initialization vector
+end %end of loop for Mu_max
+end %end of loop for K
+end %end of loop for Ki
+
+% Set parameter(s) to Best ones found! and rerun simulation 8. BA
+mu_max=Best_mu_max;
+K=Best_K;
+Ki=Best_Ki;
+%experimental loop
+% Initial Sum of Square Error
+SSE=(X_act(1)-X(1))^2;
+for i=2:N 
+t(i)=t(i-1)+delt;% BA time vector
+
+%[xdot]=vdv_fxn(t,x,opts,param,u)
+[~,Xout]=ode45('bioreactor_ode_EC',[t(i-1) ,t(i)],x0,[],param,Fin(i-1),mu_max,K,Ki);
+
+%unpack Xout to common notation for states
+X(i)=Xout(end,1); 
+S(i)=Xout(end,2);
+P(i)=Xout(end,3);
+% ba reinitialization vector
+x0=[X(i);S(i);P(i)];
+
+%BA call sum of sq error
+SSE=SSE+(X_act(i)-X(i))^2;
+end
+MSE=SSE/N; % mean square error divide total by number samples
+
+%Graphing
+%ploting subplot
+figure(1);
+subplot(4,1,1);plot(t,X,'rx',t_act,X_act,'kd') 
+ylabel('X(g cells/L')
+legend('Predicted','Actual')
+title(['Final Project Part 4 MSE=',num2str(MSE),' with the best mu max=',num2str(mu_max),'best K=',num2str(K),'and best Ki=',num2str(Ki)])
+subplot(4,1,2);plot(t,S)
+ylabel('S(g substrate/L')
+subplot(4,1,3);plot(t,P)
+ylabel('P(g Protein/L')
+subplot(4,1,4);plot(t,Fin)
+ylabel('Fin(g L/hr)')
+xlabel('Time(hrs)')
+
+
